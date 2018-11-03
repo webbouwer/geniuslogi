@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<title>User geolocation tests</title>
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="initial-scale=1.0, width=device-width" />
+
+<script>
+
+window.onload = function() { 
+
+    var userPositionData = new userPosition();
+	
+ }
+
+
+/* 
+
+latitude - Geographical latitude in decimal degrees.
+longitude - Geographical longitude in decimal degrees. 
+altitude - Height in meters relative to sea level.
+accuracy - Possible error margin for the coordinates in meters. 
+altitudeAccuracy - Possible error margin for the altitude in meters. 
+heading - The direction of the device in degrees relative to north. 
+speed - The velocity of the device in meters per second.	
+	
+https://tutorialzine.com/2016/06/quick-tip-detecting-your-location-with-javascript
+http://w3c.github.io/geolocation-api/
+    
+*/
+
+var userPosition = function(){
+
+	var root = this;
+
+	this.locationcheckcount = 0;
+	this.userLocations = [];
+
+	this.showData = false;
+	this.msgbox = 'msgbox';
+	this.outputElement = 'geoDataDisplay';
+
+	this.construct = function(){
+	
+		this.getUserLocation(); 
+		
+	}
+
+ 	this.doGeo = function( position ){
+	
+		var pos = {
+			'lat': position.coords.latitude,
+			'lon': position.coords.longitude,
+			'alt': position.coords.altitude,
+			'altacc': position.coords.altitudeAccuracy,
+			'head': position.coords.heading,
+			'speed': position.coords.speed,
+			'acc': position.coords.accuracy,
+			'timestamp': position.timestamp,
+			'timeview': Math.floor(Date.now() / 1000)	
+		};
+		
+		root.userLocations[this.locationcheckcount++] = pos;
+		
+		if( root.showData ){
+			document.getElementById(root.outputElement).innerHTML = '<div class="monitor" data-timestamp="'+pos.timestamp+'" data-check="'+root.locationcheckcount+'">'+
+			'<div>Latitude: '+ pos.lat +'</div><div>Longitude: '+ pos.lon +'</div><div>Altitude: '+ pos.alt +'</div>'+
+			'<div>Heading: '+ pos.head +'</div><div>Speed: '+ pos.speed +'</div><div>Accuracy: '+ pos.acc +'</div><div>Acc. altitude: '+ pos.altacc +'</div>'
+			+'</div>';
+		}
+		
+		// chk overwrite 30 seconds = 6 / after 1 hour = 720 ( 720 * 5 = 3600 seconds )
+		if( root.locationcheckcount == 720 ){
+			root.locationcheckcount = 0;
+		} 
+	
+	}
+	
+	this.lost = function(){
+	
+		document.getElementById(root.msgbox).innerHTML = '<div class="fault">Could not get your location, please check your network and allow use of location tracking.</div>';
+		
+	}
+	
+	this.getUserLocation = function(){
+	
+		document.getElementById(root.msgbox).innerHTML = '';
+		
+		if( navigator.geolocation ){
+		
+			navigator.geolocation.watchPosition( this.doGeo, this.lost, {maximumAge:30000, timeout:30000, enableHighAccuracy:true} ); // 5 seceonds old max, 5 second timeout?
+		
+		}else{
+		
+			document.getElementById(root.msgbox).innerHTML = '<div class="fault">Could not get your location, please allow use of location tracking.</div>';
+		
+		} 
+	
+	}
+	
+	this.construct();
+
+}
+
+
+
+</script>
+</head>
+<body>
+<div id="msgbox"></div>
+<div id="geoDataDisplay"></div>
+</body>
+</html>
