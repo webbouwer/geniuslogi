@@ -7,6 +7,18 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <meta name="viewport" content="initial-scale=1.0, width=device-width" />
 <script language="javascript" type="text/javascript" src="js/geolocation.js"></script>
+<script>
+window.onload = function(){
+    var userLocation = new userPosition();
+    function loadPos(){
+        setTimeout( function(){
+            document.body.innerHTML = userLocation.datahtml;
+            loadPos();
+        }, 500);
+    }
+    loadPos();
+}
+</script>
 </head>
 <body>
 </body>
